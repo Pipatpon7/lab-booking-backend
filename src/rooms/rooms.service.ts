@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Room } from './room.entity';
@@ -13,8 +17,15 @@ export class RoomsService {
   findAll(): Promise<Room[]> {
     return this.roomsRepository.find({ where: { isActive: true } });
   }
+  findAllAdmin(): Promise<Room[]> {
+    // ไม่ filter isActive เพื่อให้ admin เห็นทุกห้อง
+    return this.roomsRepository.find();
+  }
 
   async findOne(id: number): Promise<Room> {
+    if (isNaN(id)) {
+      throw new BadRequestException('ID ของห้องต้องเป็นตัวเลขเท่านั้น');
+    }
     const room = await this.roomsRepository.findOne({ where: { id } });
     if (!room) throw new NotFoundException('ไม่พบห้องนี้');
     return room;

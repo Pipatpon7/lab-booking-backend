@@ -7,6 +7,7 @@ import {
   Param,
   Body,
   UseGuards,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { RoomsService } from './rooms.service';
@@ -23,9 +24,17 @@ export class RoomsController {
     return this.roomsService.findAll();
   }
 
+  @Get('all')
+  @UseGuards(RolesGuard)
+  @Roles('admin')
+  findAllIncludingInactive() {
+    // admin ดูได้ทุกห้องรวมที่ปิดแล้ว
+    return this.roomsService.findAllAdmin();
+  }
+
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.roomsService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.roomsService.findOne(id);
   }
 
   @Post()
