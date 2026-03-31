@@ -6,6 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Booking } from './booking.entity';
+import { LessThan, MoreThan, Not } from 'typeorm';
 
 @Injectable()
 export class BookingsService {
@@ -23,7 +24,13 @@ export class BookingsService {
     note: string,
   ): Promise<Booking> {
     const conflict = await this.bookingsRepository.findOne({
-      where: { room: { id: roomId }, date, startTime, status: 'approved' },
+      where: {
+        room: { id: roomId },
+        date,
+        status: Not('reject'),
+        startTime: LessThan(endTime),
+        endTime: MoreThan(startTime),
+      },
     });
     if (conflict) throw new BadRequestException('ช่วงเวลานี้ถูกจองแล้ว');
 
